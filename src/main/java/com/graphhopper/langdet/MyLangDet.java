@@ -17,6 +17,7 @@ public class MyLangDet {
     private Set<String> detSet = new HashSet<String>();
 
     public void init() throws IOException {
+        // use one set or combine?
         // detSet = read(new InputStreamReader(getClass().getResourceAsStream("lang_det_de.txt")));
         detSet = read(new InputStreamReader(getClass().getResourceAsStream("decompound_de.txt")));
     }

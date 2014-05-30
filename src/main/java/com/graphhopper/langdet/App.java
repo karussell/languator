@@ -19,11 +19,15 @@ public class App {
     public static void main(String[] args) throws Exception {
         // xy.pbf file - download it e.g. from download.geofabrik.de and specify as first argument
         //
-        // /media/SAMSUNG/maps/germany.pbf de (from http://download.geofabrik.de/europe/germany-latest.osm.pbf)
-        // /media/SAMSUNG/maps/france.pbf fr (from http://download.geofabrik.de/europe/france-latest.osm.pbf)
-        // from http://download.geofabrik.de/europe/italy-latest.osm.pbf
-        // from http://download.geofabrik.de/europe/great-britain-latest.osm.pbf
+        // profile.map => bad accuracy for everything except DE
+        // profile.sm  => even worse
+        // idea: add significant terms like 'street' multiple times
+        // idea2: use our keyword based detector before language-detection
 
+        // /media/SAMSUNG/maps/great-britain.pbf en (from http://download.geofabrik.de/europe/great-britain-latest.osm.pbf)
+        // /media/SAMSUNG/maps/germany.pbf de (from http://download.geofabrik.de/europe/germany-latest.osm.pbf)       
+        // /media/SAMSUNG/maps/france.pbf fr (from http://download.geofabrik.de/europe/france-latest.osm.pbf)        
+        // /media/SAMSUNG/maps/italy.pbf it (from http://download.geofabrik.de/europe/italy-latest.osm.pbf)        
         if (args.length != 2)
             throw new RuntimeException("Please use it via 'App <pbf file> <lang-code>");
 
@@ -36,19 +40,19 @@ public class App {
 
         init(stream, lang);
 
-        // myLangDet(stream);
-        // langDet(stream);
+        // langDet(stream, lang);
+        // myLangDet(stream, lang);        
     }
 
+    /**
+     * Creates one profile for the specified stream and language.
+     */
     public void init(OSMStream stream, String lang) throws Exception {
         List<String> grams = new ArrayList<String>();
         LangProfile profile = new LangProfile(lang);
         int counter = 0;
         while (stream.hasMore()) {
             String name = stream.getNext();
-            if (name.isEmpty())
-                continue;
-
             if (name.length() < 5)
                 continue;
 
@@ -80,8 +84,12 @@ public class App {
         JSON.encode(profile, os);
     }
 
-    private static void langDet(OSMStream stream, String lang) throws Exception {
-        // DetectorFactory.loadProfile(new File("profiles.sm"));
+    /**
+     * Determines the language of the specified stream via the
+     * language-detection project tuned towards local names in profiles.map/
+     */
+    public void langDet(OSMStream stream, String lang) throws Exception {
+        // DetectorFactory.loadProfile(new File("profiles.sm/"));
         DetectorFactory.loadProfile(new File("profiles.map/"));
 
         // avoid randomness
@@ -95,20 +103,13 @@ public class App {
 
         int counter = 0;
         int errors = 0;
-        MyLangDet myLangDet = new MyLangDet();
-        myLangDet.init();
         while (stream.hasMore()) {
             String name = stream.getNext();
-            if (name.isEmpty())
-                continue;
-
-            if (name.startsWith("A ") || name.startsWith("B ") || name.startsWith("S ") || name.startsWith("L ") || name.startsWith("K "))
+            if (isNotName(name))
                 continue;
 
             try {
                 counter++;
-//                if (!lang.equals(myLangDet.getLang(name))) {
-
                 Detector detector = DetectorFactory.create();
                 detector.setPriorMap(priorMap);
                 detector.append(name);
@@ -116,7 +117,6 @@ public class App {
                     errors++;
                     // System.out.println(name + ": " + detector.getProbabilities());
                 }
-//                }
             } catch (LangDetectException ex) {
                 if (!ex.getMessage().equals("no features in text"))
                     System.out.println("ERROR:" + name + ", " + ex.getMessage() + ", " + ex.getClass());
@@ -126,23 +126,23 @@ public class App {
         System.out.println("counter " + counter + ", errors:" + errors + ", " + (float) errors / counter);
     }
 
-    private void myLangDet(OSMStream stream, String lang) throws IOException {
+    /**
+     * Faster language detection but probably does not scale for many languages
+     */
+    public void myLangDet(OSMStream stream, String lang) throws IOException {
         int counter = 0;
         int errors = 0;
         MyLangDet myLangDet = new MyLangDet();
         myLangDet.init();
         while (stream.hasMore()) {
             String name = stream.getNext();
-            if (name.isEmpty())
-                continue;
-            if (name.startsWith("A ") || name.startsWith("B ") || name.startsWith("S ")
-                    || name.startsWith("L ") || name.startsWith("K "))
+            if (isNotName(name))
                 continue;
 
             counter++;
             if (!lang.equals(myLangDet.getLang(name))) {
                 errors++;
-                System.out.println("name " + name);
+                // System.out.println("name " + name);
             }
         }
         System.out.println("counter " + counter + ", errors:" + errors + ", " + (float) errors / counter);
@@ -159,6 +159,9 @@ public class App {
     }
 
     private boolean isNotName(String name) {
+        if (name.isEmpty())
+            return true;
+
         if (name.startsWith("A ") || name.startsWith("B ")
                 || name.startsWith("S ")
                 || name.startsWith("H ")
