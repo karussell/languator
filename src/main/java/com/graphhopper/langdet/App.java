@@ -38,9 +38,8 @@ public class App {
         OSMStream stream = new OSMStream(file);
         stream.start();
 
-        init(stream, lang);
-
-        // langDet(stream, lang);
+        // init(stream, lang);
+        langDet(stream, lang);
         // myLangDet(stream, lang);        
     }
 
@@ -48,6 +47,7 @@ public class App {
      * Creates one profile for the specified stream and language.
      */
     public void init(OSMStream stream, String lang) throws Exception {
+        System.out.println("init " + lang + " from " + stream.getName());
         List<String> grams = new ArrayList<String>();
         LangProfile profile = new LangProfile(lang);
         int counter = 0;
@@ -89,14 +89,16 @@ public class App {
      * language-detection project tuned towards local names in profiles.map/
      */
     public void langDet(OSMStream stream, String lang) throws Exception {
-        // DetectorFactory.loadProfile(new File("profiles.sm/"));
-        DetectorFactory.loadProfile(new File("profiles.map/"));
+        // String profiles = "profiles.sm/";
+        String profiles = "profiles.map/";
+        System.out.println("run content of " + stream.getName() + " and detect language '" + lang + "' using " + profiles);
+        DetectorFactory.loadProfile(new File(profiles));
 
         // avoid randomness
         DetectorFactory.setSeed(0);
-        // prefer english
+        // slightly prefer english
         HashMap priorMap = new HashMap();
-        priorMap.put("en", .3d);
+        priorMap.put("en", .12d);
         priorMap.put("de", .1d);
         priorMap.put("fr", .1d);
         priorMap.put("it", .1d);
@@ -130,6 +132,7 @@ public class App {
      * Faster language detection but probably does not scale for many languages
      */
     public void myLangDet(OSMStream stream, String lang) throws IOException {
+        System.out.println("run content of " + stream.getName() + " and detect " + lang);
         int counter = 0;
         int errors = 0;
         MyLangDet myLangDet = new MyLangDet();

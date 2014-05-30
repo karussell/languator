@@ -3,8 +3,6 @@ package com.graphhopper.langdet;
 import java.io.File;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
 import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
 import org.openstreetmap.osmosis.core.task.v0_6.Sink;
@@ -18,9 +16,10 @@ public class OSMStream extends Thread implements Sink {
     private boolean completed = false;
     private final PbfReader reader;
     private final LinkedBlockingDeque<String> queue = new LinkedBlockingDeque<String>(1000);
-    private Exception exception;
+    private Exception exception;    
 
     public OSMStream(File file) {
+        setName(file.getName());
         reader = new PbfReader(file, 2);
         reader.setSink(this);
     }
