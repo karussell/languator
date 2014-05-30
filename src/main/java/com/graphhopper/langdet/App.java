@@ -33,7 +33,7 @@ public class App {
         // (from http://download.geofabrik.de/europe/italy-latest.osm.pbf)
         // init /media/SAMSUNG/maps/italy.pbf it
         if (args.length != 3)
-            throw new RuntimeException("Please use it via 'App <pbf file> <lang-code>");
+            throw new RuntimeException("Please use it via 'App <mode=init|langdet|mylangdet> <pbf file> <lang-code>");
 
         new App().start(args[0], new File(args[1]), args[2]);
     }
