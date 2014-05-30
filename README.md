@@ -3,7 +3,7 @@ Hacking to make language detection for map specific names like POIs and street n
 Currently there are the following approaches:
 
  * A very simple keywords based approach which is fast and reaches over
-   99.9% accuracy but has limited language support and it might be that it won't scale for many languages.
+   99% accuracy but has limited language support and it might be that it won't scale for many languages.
  * We take the existing tool at
    https://code.google.com/p/language-detection and feed this with OpenStreetMap
    data to improve detection for short text (profile.map). It takes 6 minutes for entire Germany to create one language for this profile.
