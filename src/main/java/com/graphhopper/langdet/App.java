@@ -13,47 +13,36 @@ import java.util.List;
 import net.arnx.jsonic.JSON;
 
 /**
- * Hacking to make language detection for map specific names like POIs and
- * street names.
- *
- * There are two approaches:
- *
- * one is a very simple keywords based approach which is fast and reaches over
- * 99.9% accuracy but has limited language support and it might be that it won't
- * scale for many languages.
- *
- * The other approach is using the tool at
- * https://code.google.com/p/language-detection and feed this with OpenStreetMap
- * data to improve detection for short text. Detection speed is not that good
- * but okayish if not executed too often e.g. for our purpose of identifying
- * query string languages. If the normal short message profile is used the
- * accuracy is slightly worse compared to our own.
  */
 public class App {
 
     public static void main(String[] args) throws Exception {
-        // xy.pbf file - get it e.g. from download.geofabrik.de
-        // en <-> http://download.geofabrik.de/europe/great-britain-latest.osm.pbf
-        // de <-> http://download.geofabrik.de/europe/germany-latest.osm.pbf
-        // it <-> http://download.geofabrik.de/europe/italy-latest.osm.pbf
-        // fr <-> http://download.geofabrik.de/europe/france-latest.osm.pbf        
-        new App().start(new File(args[0]));
+        // xy.pbf file - download it e.g. from download.geofabrik.de and specify as first argument
+        //
+        // /media/SAMSUNG/maps/germany.pbf de (from http://download.geofabrik.de/europe/germany-latest.osm.pbf)
+        // /media/SAMSUNG/maps/france.pbf fr (from http://download.geofabrik.de/europe/france-latest.osm.pbf)
+        // from http://download.geofabrik.de/europe/italy-latest.osm.pbf
+        // from http://download.geofabrik.de/europe/great-britain-latest.osm.pbf
+
+        if (args.length != 2)
+            throw new RuntimeException("Please use it via 'App <pbf file> <lang-code>");
+
+        new App().start(new File(args[0]), args[1]);
     }
 
-    void start(File file) throws Exception {
+    void start(File file, String lang) throws Exception {
         OSMStream stream = new OSMStream(file);
         stream.start();
 
-        init(stream);
+        init(stream, lang);
 
         // myLangDet(stream);
         // langDet(stream);
     }
 
-    public void init(OSMStream stream) throws Exception {
-        String lang = "de";
+    public void init(OSMStream stream, String lang) throws Exception {
         List<String> grams = new ArrayList<String>();
-        LangProfile profile = new LangProfile("de");
+        LangProfile profile = new LangProfile(lang);
         int counter = 0;
         while (stream.hasMore()) {
             String name = stream.getNext();
@@ -73,7 +62,9 @@ public class App {
             MyLangDet.gram(grams);
             for (String gram : grams) {
                 if (isNotName(gram))
-                    profile.add(gram);
+                    continue;
+
+                profile.add(gram);
             }
             grams.clear();
             counter++;
@@ -89,7 +80,7 @@ public class App {
         JSON.encode(profile, os);
     }
 
-    private static void langDet(OSMStream stream) throws Exception {
+    private static void langDet(OSMStream stream, String lang) throws Exception {
         // DetectorFactory.loadProfile(new File("profiles.sm"));
         DetectorFactory.loadProfile(new File("profiles.map/"));
 
@@ -116,12 +107,12 @@ public class App {
 
             try {
                 counter++;
-//                if (!"de".equals(myLangDet.getLang(name))) {
+//                if (!lang.equals(myLangDet.getLang(name))) {
 
                 Detector detector = DetectorFactory.create();
                 detector.setPriorMap(priorMap);
                 detector.append(name);
-                if (!"de".equals(detector.detect())) {
+                if (!lang.equals(detector.detect())) {
                     errors++;
                     // System.out.println(name + ": " + detector.getProbabilities());
                 }
@@ -135,7 +126,7 @@ public class App {
         System.out.println("counter " + counter + ", errors:" + errors + ", " + (float) errors / counter);
     }
 
-    private void myLangDet(OSMStream stream) throws IOException {
+    private void myLangDet(OSMStream stream, String lang) throws IOException {
         int counter = 0;
         int errors = 0;
         MyLangDet myLangDet = new MyLangDet();
@@ -149,7 +140,7 @@ public class App {
                 continue;
 
             counter++;
-            if (!"de".equals(myLangDet.getLang(name))) {
+            if (!lang.equals(myLangDet.getLang(name))) {
                 errors++;
                 System.out.println("name " + name);
             }
@@ -174,7 +165,7 @@ public class App {
                 || name.startsWith("K ")
                 || name.startsWith("L "))
             return true;
-        
+
         // if number, skip
         try {
             int value = Integer.parseInt(name);
