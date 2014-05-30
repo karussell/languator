@@ -24,23 +24,30 @@ public class App {
         // idea: add significant terms like 'street' multiple times
         // idea2: use our keyword based detector before language-detection
 
-        // /media/SAMSUNG/maps/great-britain.pbf en (from http://download.geofabrik.de/europe/great-britain-latest.osm.pbf)
-        // /media/SAMSUNG/maps/germany.pbf de (from http://download.geofabrik.de/europe/germany-latest.osm.pbf)       
-        // /media/SAMSUNG/maps/france.pbf fr (from http://download.geofabrik.de/europe/france-latest.osm.pbf)        
-        // /media/SAMSUNG/maps/italy.pbf it (from http://download.geofabrik.de/europe/italy-latest.osm.pbf)        
+        // (from http://download.geofabrik.de/europe/great-britain-latest.osm.pbf)
+        // init /media/SAMSUNG/maps/great-britain.pbf en
+        // (from http://download.geofabrik.de/europe/germany-latest.osm.pbf)
+        // init /media/SAMSUNG/maps/germany.pbf de
+        // (from http://download.geofabrik.de/europe/france-latest.osm.pbf)
+        // /media/SAMSUNG/maps/france.pbf fr
+        // (from http://download.geofabrik.de/europe/italy-latest.osm.pbf)
+        // init /media/SAMSUNG/maps/italy.pbf it
         if (args.length != 2)
             throw new RuntimeException("Please use it via 'App <pbf file> <lang-code>");
 
-        new App().start(new File(args[0]), args[1]);
+        new App().start(args[0], new File(args[1]), args[2]);
     }
 
-    void start(File file, String lang) throws Exception {
+    void start(String mode, File file, String lang) throws Exception {
         OSMStream stream = new OSMStream(file);
         stream.start();
 
-        // init(stream, lang);
-        langDet(stream, lang);
-        // myLangDet(stream, lang);        
+        if (mode.equals("init"))
+            init(stream, lang);
+        else if (mode.equals("langdet"))
+            langDet(stream, lang);
+        else if (mode.equals("mylangdet"))
+            myLangDet(stream, lang);
     }
 
     /**
