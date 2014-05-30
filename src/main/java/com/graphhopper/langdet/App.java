@@ -17,13 +17,8 @@ import net.arnx.jsonic.JSON;
 public class App {
 
     public static void main(String[] args) throws Exception {
-        // xy.pbf file - download it e.g. from download.geofabrik.de and specify as first argument
-        //
-        // profile.map => bad accuracy for everything except DE
-        // profile.sm  => even worse
-        // idea: add significant terms like 'street' multiple times
-        // idea2: use our keyword based detector before language-detection
-
+        // xy.pbf file - download it e.g. from download.geofabrik.de and specify as second argument
+        //        
         // (from http://download.geofabrik.de/europe/great-britain-latest.osm.pbf)
         // init /media/SAMSUNG/maps/great-britain.pbf en
         // (from http://download.geofabrik.de/europe/germany-latest.osm.pbf)
@@ -32,6 +27,13 @@ public class App {
         // /media/SAMSUNG/maps/france.pbf fr
         // (from http://download.geofabrik.de/europe/italy-latest.osm.pbf)
         // init /media/SAMSUNG/maps/italy.pbf it
+        //
+        //
+        // profile.map => bad accuracy for everything except DE
+        // profile.sm  => even worse
+        // idea: add significant terms like 'street' multiple times
+        // idea2: use our keyword based detector before language-detection
+
         if (args.length != 3)
             throw new RuntimeException("Please use it via 'App <mode=init|langdet|mylangdet> <pbf file> <lang-code>");
 
