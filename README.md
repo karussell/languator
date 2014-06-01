@@ -1,3 +1,5 @@
+Tools for language detection in Java.
+
 Hacking to make language detection for map specific names like POIs and street names.
 
 Currently there are the following approaches:
