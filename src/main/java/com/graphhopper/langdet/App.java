@@ -9,7 +9,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import net.arnx.jsonic.JSON;
 
 /**
@@ -29,15 +32,30 @@ public class App {
         // init /media/SAMSUNG/maps/italy.pbf it
         //
         //
-        // profile.map => bad accuracy for everything except DE
-        // profile.sm  => even worse
+        // profile.map3 => grams of size 3
+        // profile.map4 => grams of size 4
+        // profile.sm  => default short message grams of size 3
+        //
         // idea: add significant terms like 'street' multiple times
         // idea2: use our keyword based detector before language-detection
 
+//        runAll("init", "/media/SAMSUNG/maps");
+//        runAll("langdet", "/media/SAMSUNG/maps");
         if (args.length != 3)
             throw new RuntimeException("Please use it via 'App <mode=init|langdet|mylangdet> <pbf file> <lang-code>");
-
         new App().start(args[0], new File(args[1]), args[2]);
+    }
+
+    public static void runAll(String mode, String dir) throws Exception {
+        Map<String, String> map = new LinkedHashMap<String, String>();
+        map.put("en", dir + "/great-britain.pbf");
+        map.put("de", dir + "/germany.pbf");
+        map.put("it", dir + "/italy.pbf");
+        map.put("fr", dir + "/france.pbf");
+
+        for (Entry<String, String> e : map.entrySet()) {
+            new App().start(mode, new File(e.getValue()), e.getKey());
+        }
     }
 
     void start(String mode, File file, String lang) throws Exception {
@@ -71,8 +89,11 @@ public class App {
             name = name.replaceAll("[\\\"\\:\\;\\&\\.\\!\\?\\)\\(\\[\\]\\,\\>\\<\\-\\n\\t\\&]", " ");
             // System.out.println(name + ", " + stream.getCurrentSize());
 
-            grams.add(name);
-            MyLangDet.gram(grams);
+            for (String gram : name.split(" ")) {
+                grams.add(gram);
+            }
+
+            MyLangDet.gramOld(grams);
             for (String gram : grams) {
                 if (isNotName(gram))
                     continue;
@@ -101,6 +122,7 @@ public class App {
         // String profiles = "profiles.sm/";
         String profiles = "profiles.map/";
         System.out.println("run content of " + stream.getName() + " and detect language '" + lang + "' using " + profiles);
+        DetectorFactory.clear();
         DetectorFactory.loadProfile(new File(profiles));
 
         // avoid randomness

@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
+import org.openstreetmap.osmosis.core.domain.v0_6.EntityType;
 import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
 import org.openstreetmap.osmosis.core.task.v0_6.Sink;
 import org.openstreetmap.osmosis.pbf2.v0_6.PbfReader;
@@ -16,7 +17,7 @@ public class OSMStream extends Thread implements Sink {
     private boolean completed = false;
     private final PbfReader reader;
     private final LinkedBlockingDeque<String> queue = new LinkedBlockingDeque<String>(1000);
-    private Exception exception;    
+    private Exception exception;
 
     public OSMStream(File file) {
         setName(file.getName());

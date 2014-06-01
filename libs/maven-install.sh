@@ -4,6 +4,3 @@ VERSION=03-2014
 
 ARGS="-DgroupId=com.graphhopper -DartifactId=jsonic -Dversion=$VERSION -Dpackaging=jar -Dfile=jsonic-1.2.0.jar"
 $MVN install:install-file $ARGS
-
-ARGS="-DgroupId=com.graphhopper -DartifactId=langdetect -Dversion=$VERSION -Dpackaging=jar -Dfile=langdetect.jar" 
-$MVN install:install-file $ARGS
