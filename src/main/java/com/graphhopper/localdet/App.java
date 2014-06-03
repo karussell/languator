@@ -1,4 +1,4 @@
-package com.graphhopper.langdet;
+package com.graphhopper.localdet;
 
 import com.cybozu.labs.langdetect.Detector;
 import com.cybozu.labs.langdetect.DetectorFactory;
@@ -7,10 +7,9 @@ import com.cybozu.labs.langdetect.util.LangProfile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import net.arnx.jsonic.JSON;
@@ -39,11 +38,12 @@ public class App {
         // idea: add significant terms like 'street' multiple times
         // idea2: use our keyword based detector before language-detection
 
-//        runAll("init", "/media/SAMSUNG/maps");
-//        runAll("langdet", "/media/SAMSUNG/maps");
+//        runAll("myinit", "/media/SAMSUNG/maps");
+//        runAll("mylangdet", "/media/SAMSUNG/maps");
         if (args.length != 3)
             throw new RuntimeException("Please use it via 'App <mode=init|langdet|mylangdet> <pbf file> <lang-code>");
         new App().start(args[0], new File(args[1]), args[2]);
+        System.exit(0);
     }
 
     public static void runAll(String mode, String dir) throws Exception {
@@ -57,6 +57,7 @@ public class App {
             new App().start(mode, new File(e.getValue()), e.getKey());
         }
     }
+    private final int minNgram = 4;
 
     void start(String mode, File file, String lang) throws Exception {
         OSMStream stream = new OSMStream(file);
@@ -66,6 +67,8 @@ public class App {
             init(stream, lang);
         else if (mode.equals("langdet"))
             langDet(stream, lang);
+        else if (mode.equals("myinit"))
+            myInit(stream, lang);
         else if (mode.equals("mylangdet"))
             myLangDet(stream, lang);
     }
@@ -74,37 +77,33 @@ public class App {
      * Creates one profile for the specified stream and language.
      */
     public void init(OSMStream stream, String lang) throws Exception {
-        System.out.println("init " + lang + " from " + stream.getName());
-        List<String> grams = new ArrayList<String>();
+        log("init " + lang + " from " + stream.getName());
         LangProfile profile = new LangProfile(lang);
         int counter = 0;
         while (stream.hasMore()) {
             String name = stream.getNext();
-            if (name.length() < 5)
-                continue;
-
-            if (isNotName(name))
-                continue;
-
-            name = name.replaceAll("[\\\"\\:\\;\\&\\.\\!\\?\\)\\(\\[\\]\\,\\>\\<\\-\\n\\t\\&]", " ");
-            // System.out.println(name + ", " + stream.getCurrentSize());
-
-            for (String gram : name.split(" ")) {
-                grams.add(gram);
-            }
-
-            MyLangDet.gramOld(grams);
-            for (String gram : grams) {
-                if (isNotName(gram))
+            name = MyLang.normalize(name);
+            for (String token : name.split(" ")) {
+                token = token.trim();
+                if (token.length() < minNgram)
                     continue;
 
-                profile.add(gram);
+                if (isNotName(token))
+                    continue;
+                
+                // log(name + ", " + stream.getCurrentSize());
+
+                for (String gram : MyLangDet.gram(token, minNgram, token.length())) {
+                    if (isNotName(gram))
+                        continue;
+
+                    profile.add(gram);
+                }
             }
-            grams.clear();
             counter++;
 
             if (counter % 1000000 == 0)
-                System.out.println(counter / 1e6f + " mio words, mem:" + getUsedMB() + "/" + getTotalMB() + ", current queue size:" + stream.getCurrentSize());
+                log(counter / 1e6f + " mio words, mem:" + getUsedMB() + "/" + getTotalMB() + ", current queue size:" + stream.getCurrentSize());
         }
 
         profile.omitLessFreq();
@@ -121,7 +120,7 @@ public class App {
     public void langDet(OSMStream stream, String lang) throws Exception {
         // String profiles = "profiles.sm/";
         String profiles = "profiles.map/";
-        System.out.println("run content of " + stream.getName() + " and detect language '" + lang + "' using " + profiles);
+        log("run content of " + stream.getName() + " and detect language '" + lang + "' using " + profiles);
         DetectorFactory.clear();
         DetectorFactory.loadProfile(new File(profiles));
 
@@ -129,10 +128,10 @@ public class App {
         DetectorFactory.setSeed(0);
         // slightly prefer english
         HashMap priorMap = new HashMap();
-        priorMap.put("en", .12d);
-        priorMap.put("de", .1d);
-        priorMap.put("fr", .1d);
-        priorMap.put("it", .1d);
+        priorMap.put("en", 12d);
+        priorMap.put("de", 10d);
+        priorMap.put("fr", 10d);
+        priorMap.put("it", 10d);
 
         int counter = 0;
         int errors = 0;
@@ -148,22 +147,26 @@ public class App {
                 detector.append(name);
                 if (!lang.equals(detector.detect())) {
                     errors++;
-                    // System.out.println(name + ": " + detector.getProbabilities());
+                    // log(name + ": " + detector.getProbabilities());
                 }
+
+                if (counter % 1000000 == 0)
+                    log(counter / 1000000f + " mio");
+
             } catch (LangDetectException ex) {
                 if (!ex.getMessage().equals("no features in text"))
-                    System.out.println("ERROR:" + name + ", " + ex.getMessage() + ", " + ex.getClass());
+                    log("ERROR:" + name + ", " + ex.getMessage() + ", " + ex.getClass());
             }
         }
 
-        System.out.println("counter " + counter + ", errors:" + errors + ", " + (float) errors / counter);
+        log("counter " + counter + ", errors:" + errors + ", " + (float) errors / counter);
     }
 
     /**
      * Faster language detection but probably does not scale for many languages
      */
     public void myLangDet(OSMStream stream, String lang) throws IOException {
-        System.out.println("run content of " + stream.getName() + " and detect " + lang);
+        log("run content of " + stream.getName() + " and detect " + lang);
         int counter = 0;
         int errors = 0;
         MyLangDet myLangDet = new MyLangDet();
@@ -176,10 +179,10 @@ public class App {
             counter++;
             if (!lang.equals(myLangDet.getLang(name))) {
                 errors++;
-                // System.out.println("name " + name);
+                // log("name " + name + ", " + myLangDet.getPrios(name));
             }
         }
-        System.out.println("counter " + counter + ", errors:" + errors + ", " + (float) errors / counter);
+        log("counter " + counter + ", errors:" + errors + ", " + (float) errors / counter);
     }
 
     public static final long MB = 1L << 20;
@@ -194,13 +197,6 @@ public class App {
 
     private boolean isNotName(String name) {
         if (name.isEmpty())
-            return true;
-
-        if (name.startsWith("A ") || name.startsWith("B ")
-                || name.startsWith("S ")
-                || name.startsWith("H ")
-                || name.startsWith("K ")
-                || name.startsWith("L "))
             return true;
 
         // if number, skip
@@ -221,5 +217,49 @@ public class App {
 
         // now it could be a name
         return false;
+    }
+
+    private void myInit(OSMStream stream, String lang) throws Exception {
+        log("init " + lang + " from " + stream.getName());
+        int counter = 0;
+        Map<String, Integer> map = new HashMap<String, Integer>();
+        while (stream.hasMore()) {
+            String name = stream.getNext();
+            if (isNotName(name))
+                continue;
+            
+            name = MyLang.normalize(name);
+            for (String token : name.split(" ")) {
+                token = token.trim();
+                if (token.length() < minNgram)
+                    continue;
+
+                if (isNotName(token))
+                    continue;
+                
+                // log(name + ", " + stream.getCurrentSize());
+
+                for (String gram : MyLangDet.gram(token, minNgram, 5)) {
+                    if (isNotName(gram))
+                        continue;
+
+                    Integer old = map.put(gram, 1);
+                    if (old != null) {
+                        map.put(gram, old + 1);
+                    }
+                }
+            }
+            counter++;
+
+            if (counter % 1000000 == 0)
+                log(counter / 1e6f + " mio words, mem:" + getUsedMB() + "/" + getTotalMB() + ", current queue size:" + stream.getCurrentSize());
+        }
+
+        MyLang myLang = MyLang.build(lang, map, 5);
+        myLang.store("myprofile/" + lang + ".txt");
+    }
+
+    static void log(String str) {
+        System.out.println(new Date() + "| " + str);
     }
 }

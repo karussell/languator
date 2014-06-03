@@ -1,4 +1,4 @@
-package com.graphhopper.langdet;
+package com.graphhopper.localdet;
 
 import org.junit.Test;
 import static org.junit.Assert.*;

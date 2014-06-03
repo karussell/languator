@@ -1,4 +1,4 @@
-package com.graphhopper.langdet;
+package com.graphhopper.localdet;
 
 import java.io.File;
 import java.util.Map;
