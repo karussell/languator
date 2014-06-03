@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 import org.openstreetmap.osmosis.core.container.v0_6.EntityContainer;
-import org.openstreetmap.osmosis.core.domain.v0_6.EntityType;
 import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
 import org.openstreetmap.osmosis.core.task.v0_6.Sink;
 import org.openstreetmap.osmosis.pbf2.v0_6.PbfReader;
@@ -12,7 +11,7 @@ import org.openstreetmap.osmosis.pbf2.v0_6.PbfReader;
 /**
  * @author Peter Karich
  */
-public class OSMStream extends Thread implements Sink {
+public class OSMStream extends Thread implements StringStream, Sink {
 
     private boolean completed = false;
     private final PbfReader reader;
@@ -35,7 +34,8 @@ public class OSMStream extends Thread implements Sink {
         }
     }
 
-    public boolean hasMore() {
+    @Override
+    public boolean hasNext() {
         return !hasError() && (!completed || !queue.isEmpty());
     }
 
@@ -47,7 +47,8 @@ public class OSMStream extends Thread implements Sink {
         return exception;
     }
 
-    public String getNext() {
+    @Override
+    public String next() {
         try {
             // block if nothing available
             return queue.take();
@@ -79,7 +80,7 @@ public class OSMStream extends Thread implements Sink {
     public void release() {
     }
 
-    int getCurrentSize() {
+    public int getCurrentSize() {
         return queue.size();
     }
 }

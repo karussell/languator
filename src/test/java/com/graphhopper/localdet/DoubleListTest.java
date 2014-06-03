@@ -15,6 +15,6 @@ public class DoubleListTest {
         instance.set(2, 5);
         assertEquals(0, instance.get(0), 1e-4);
         assertEquals(5, instance.get(2), 1e-4);
-        assertEquals("[0.0, 0.0, 5.0]", instance.toString());
+        assertEquals("[0, 0, 5]", instance.toString());
     }
 }

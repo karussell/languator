@@ -82,7 +82,8 @@ public class MyLang {
     }
 
     static String normalize(String token) {
-        // query has usually insensitive case toLowerCase().
-        return token.replaceAll("[\\\"\\/\\:\\;\\&\\.\\!\\?\\)\\(\\[\\]\\,\\>\\<\\-\\n\\t\\&]", " ");
+        // * query has usually insensitive case
+        // * removing \\\' produces slightly smaller precision (tested for en,de,it and fr)
+        return token.toLowerCase().replaceAll("[\\\"\\/\\:\\;\\&\\.\\!\\?\\)\\(\\[\\]\\,\\>\\<\\-\\n\\t\\&]", " ");
     }
 }

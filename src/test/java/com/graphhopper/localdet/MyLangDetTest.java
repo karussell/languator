@@ -16,6 +16,9 @@ public class MyLangDetTest {
         instance.init();
 //        assertEquals("", instance.getLang("test"));
         assertEquals("", instance.getLang("15"));
+        assertEquals("", instance.getLang("100"));
+        assertEquals("", instance.getLang("1000"));
+        assertEquals("", instance.getLang("10000"));
         assertEquals("", instance.getLang("B"));
         assertEquals("de", instance.getLang("straße"));
         assertEquals("de", instance.getLang("riebeckstraße"));
@@ -23,13 +26,16 @@ public class MyLangDetTest {
         assertEquals("de", instance.getLang("Erlanger Straße"));
         assertEquals("de", instance.getLang("amberg"));
         
-//        assertEquals("en", instance.getLang("Menlo Park"));        
+//        assertEquals("en", instance.getLang("Menlo Park"));
         assertEquals("en", instance.getLang("menlo abbey"));
         assertEquals("en", instance.getLang("Menlo Abbey"));
         assertEquals("en", instance.getLang("Sandringham Avenue"));
-        // System.out.println(instance.getPrios("Gravelly Hill Interchange"));
         assertEquals("en", instance.getLang("Gravelly Hill Interchange"));        
         assertEquals("en", instance.getLang("Burgoyne's Road"));
+        
+        assertEquals("it", instance.getLang("Trento Centro"));
+        assertEquals("it", instance.getLang("Via Delle Bocchette"));
+        assertEquals("it", instance.getLang("San Michele all'Adige - Mezzocorona (Val di Non)"));
     }
 
     @Test

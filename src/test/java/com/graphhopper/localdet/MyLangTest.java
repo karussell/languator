@@ -12,5 +12,6 @@ public class MyLangTest {
     @Test
     public void testNormalize() {
         assertEquals("plauen ", MyLang.normalize("plauen,"));
+        // assertEquals("helm ", MyLang.normalize("helm'"));
     }
 }

@@ -72,21 +72,17 @@ public class MyLangDet {
         for (Entry<String, Integer> e : addedLanguages.entrySet()) {
             langPrios.add(new LangPrio(e.getKey(), 0));
         }
-        
-        // text = MyLang.normalize(text);
+
+        text = MyLang.normalize(text);
         for (String gram : gram(text, minGram, maxGram)) {
             IntList list = langMap.get(gram);
             if (list == null)
                 continue;
 
-            int max = 0;
             int len = list.size();
             for (int i = 0; i < len; i++) {
                 int val = list.get(i);
-                if (val > max) {
-                    max = val;
-                    langPrios.get(i).prio += val * gram.length();
-                }
+                langPrios.get(i).prio += val * gram.length();
             }
         }
         Collections.sort(langPrios, prioComparator);
