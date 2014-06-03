@@ -1,5 +1,6 @@
-package com.graphhopper.localdet;
+package com.graphhopper.languator;
 
+import com.graphhopper.languator.MyLangDet;
 import java.io.IOException;
 import static junit.framework.TestCase.assertEquals;
 import org.junit.Test;

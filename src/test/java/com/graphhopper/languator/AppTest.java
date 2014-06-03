@@ -1,5 +1,8 @@
-package com.graphhopper.localdet;
+package com.graphhopper.languator;
 
+import com.graphhopper.languator.App;
+import com.graphhopper.languator.StringStream;
+import com.graphhopper.languator.MyLang;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;

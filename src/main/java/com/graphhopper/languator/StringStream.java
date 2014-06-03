@@ -1,4 +1,4 @@
-package com.graphhopper.localdet;
+package com.graphhopper.languator;
 
 /**
  * @author Peter Karich

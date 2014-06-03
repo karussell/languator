@@ -1,4 +1,4 @@
-package com.graphhopper.localdet;
+package com.graphhopper.languator;
 
 import com.cybozu.labs.langdetect.Detector;
 import com.cybozu.labs.langdetect.DetectorFactory;

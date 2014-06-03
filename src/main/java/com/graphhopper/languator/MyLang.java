@@ -1,4 +1,4 @@
-package com.graphhopper.localdet;
+package com.graphhopper.languator;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;

@@ -1,5 +1,6 @@
-package com.graphhopper.localdet;
+package com.graphhopper.languator;
 
+import com.graphhopper.languator.IntList;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

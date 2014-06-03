@@ -4,7 +4,7 @@ Hacking to make language detection for map specific names like POIs and street n
 
 Currently there are the following approaches:
 
- * Our language detection (MyLangDet) is fast and has good accuracy (less than 23% errors) for short length location-based names
+ * Our language detection languator is fast and has good accuracy (less than 23% error) for short length location-based names
  * We take the existing tool at
    https://code.google.com/p/language-detection and feed this with OpenStreetMap
    data to improve detection for short text (profile.map). 
@@ -19,4 +19,4 @@ You'll need to run the script in libs/maven-install.sh to make the artifacts ava
 
 The code from language-detection stands under Apache License 2
 
-The new code (MyLangDet) stands under Apache License 2
+Languator stands under Apache License 2
