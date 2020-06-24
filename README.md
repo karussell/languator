@@ -1,6 +1,6 @@
 # More recent alternative
 
-https://github.com/pemistahl/lingua
+https://github.com/pemistahl/lingua (Kotlin)
 
 # Introduction
 
